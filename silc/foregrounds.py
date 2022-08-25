@@ -424,8 +424,7 @@ class fgNoises(object):
         """
         nu = freq_in_GHz
         T_dust = 19.6
-        #x=((nu/(nu_353))**(beta_d-2)*old_div(self.B_nu(T_dust,nu),self.B_nu(T_dust,nu_353)))**2
-        x=((nu/(nu_353))**(2*beta_d-4)*old_div(self.B_nu(T_dust,nu),self.B_nu(T_dust,nu_353)))**2
+        x=((nu/(nu_353))**(beta_d-2)*old_div(self.B_nu(T_dust,nu),self.B_nu(T_dust,nu_353)))**2
         return np.sqrt(x)
 
     def sync_power(self,freq_in_GHz, nu_K=23., beta_s=-3.1):
@@ -451,14 +450,20 @@ class fgNoises(object):
         """
         x=self.sync_power(nu1)*self.sync_power(nu2)
         return x*(ell/80.)**(-0.42)#*(old_div(ell,self.c['ell0sec'])) ** (-2.42)*ell*(ell+1)/self.c['ell0sec']/(self.c['ell0sec']+1)
-
+    
     def gal_sync_pol_new(self,ell,nu1,nu2):
         """
         in CMB
         """
         x=10.3*self.gal_sync_pol(ell,nu1,nu2)*self.A_to_CMB(nu1)* self.A_to_CMB(nu2)#/(self.A_to_CMB(23.))**2#check constant
         return x
-    
+    def pl_dust_power_new(self,ell,nu1,nu2):
+        """
+        in CMB
+        """
+        x=61*self.pl_dust_power(nu1)*self.pl_dust_power(nu2)*self.A_to_CMB(nu1)* self.A_to_CMB(nu2)*(ell/80.)**(-0.42)
+        return x
+        
     def gal_dust_pol_new(self,ell,nu1,nu2):
         """
         in CMB
@@ -467,10 +472,11 @@ class fgNoises(object):
         return x
     
     def rad_pol_ps_new(self,ell,nu1,nu2):
-        ans = (old_div(ell,self.c['ell0sec'])) ** 2 * (nu1*nu2/self.c['nu0']**2) ** self.c['al_ps'] \
+        A=0.015#0.015muk^2 at l=3000,nu=150ghz
+        ans = A*(old_div(ell,self.c['ell0sec'])) ** 2 * (nu1*nu2/self.c['nu0']**2)**(self.c['al_ps']-2) \
             * self.g_nu(nu1) * self.g_nu(nu2) / (self.g_nu(self.c['nu0']))**2
         return ans
-
+    
     #OLD
     def gal_dust_pol_old(self,ell,nu1,nu2):
         mu1 = nu1**self.c['al_gal']*self.B_nu(self.c['Td_gal'],nu1) * self.g_nu(nu1)
